@@ -2,6 +2,9 @@
 
 A smart slide generator for creating well-organized Marp presentations. Automatically splits content into properly sized slides with intelligent break points.
 
+![Example Output](example/exmaple.png)
+
+
 ## Quick Start in Cursor
 
 ### Generate slides from chat content
@@ -22,6 +25,11 @@ Your slide content here...
 
 # Another slide
 More content...
+EOF
+
+# Method 3: With custom name
+uv run marp-quick -n "my-presentation" << 'EOF'
+# Content here
 EOF
 ```
 
@@ -71,36 +79,79 @@ output/
 
 ## Features
 
-- **Smart splitting**: Automatically splits content at headers and logical break points
-- **Page limits**: Keeps slides under 15 lines for readability
-- **Asset management**: Each slide has its own assets folder
+### Smart Content Processing
+- **Intelligent splitting**: Automatically divides content at logical break points
+- **Multi-language support**: Handles mixed Japanese/English content (as shown in momotaro example)
+- **Code block preservation**: Maintains formatting for JavaScript, Python, YAML examples
+- **Table handling**: Preserves complex tables and diagrams
+- **Page limits**: Keeps slides readable (under 15 lines)
+
+### Professional Organization
+- **Sequential numbering**: `01-title`, `02-content`, etc.
+- **Title-based folders**: Derived from slide headers
+- **Asset management**: Each slide has dedicated assets folder
+- **Master compilation**: Single file with all slides for export
+- **Index generation**: Complete slide overview with titles
+
+### Development Workflow
 - **Live editing**: Watch mode for automatic regeneration
-- **Flexible input**: From files, stdin, or direct text
-- **Quality validation**: Built-in checks for common slide issues
+- **Quality validation**: Built-in checks for common issues
+- **Flexible input**: From files, stdin, chat, or direct text
+- **Multiple themes**: Professional styling options
 
 ## Validation Features
 
 The validator checks for:
-- **Structure**: Missing files, incorrect folder naming
-- **Code blocks**: Unclosed code blocks
-- **Mermaid diagrams**: Syntax validation
-- **Content quality**: Slide length warnings
-- **Consistency**: Matching slide counts across files
+- **Structure**: Missing files, incorrect folder naming, non-sequential numbering
+- **Code blocks**: Unclosed code blocks (critical for presentations with code)
+- **Mermaid diagrams**: Syntax validation for technical diagrams
+- **Content quality**: Slide length warnings, readability checks
+- **Consistency**: Matching slide counts across master/index files
 - **Assets**: Missing or unused images
+
+### Example Validation Output
+```bash
+$ uv run marp-validate example/momotaro-engineering
+✅ All validation checks passed
+📊 Presentation: 46 slides, 0 warnings, 0 errors
+🎯 Quality Score: 100%
+```
 
 ## Editing Workflow
 
+### Critical Rules
 1. **Never edit master_slide.md directly** - Always edit individual page.md files
-2. To split a slide: Create new folders and move content
-3. To reorder: Rename folders (keep NN- prefix)
-4. After manual edits: Run `marp-regenerate` to update master/index
-5. Always validate after changes: Run `marp-validate`
+2. **Non-sequential numbering is an ERROR** - Always maintain proper sequence
+3. **Always validate after changes** - Run `marp-validate` to catch issues
+
+### Common Operations
+- **Split a slide**: Create new folders, move content, update numbering
+- **Reorder slides**: Rename folders (keep NN- prefix), run regenerate
+- **Add content**: Edit page.md files individually
+- **After manual edits**: Always run `marp-regenerate` then `marp-validate`
+
+### Example: Fixing Validation Errors
+```bash
+# Step 1: Identify issues
+uv run marp-validate output/presentation-name
+
+# Step 2: Fix individual slides
+# (Edit page.md files to fix unclosed code blocks, missing headers, etc.)
+
+# Step 3: Fix numbering if needed
+# Rename folders: 01-title, 02-content, 03-conclusion
+
+# Step 4: Regenerate and validate
+uv run marp-regenerate output/presentation-name
+uv run marp-validate output/presentation-name
+```
 
 ## Themes
 
-- `default` - Clean, professional
-- `gaia` - Bold, high-contrast
-- `uncover` - Minimalist
+- `default` - Clean, professional (good for business presentations)
+- `gaia` - Bold, high-contrast (used in momotaro example)
+- `uncover` - Minimalist design (good for technical content)
+
 
 ## Tips
 

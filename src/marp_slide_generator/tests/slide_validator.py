@@ -162,8 +162,16 @@ class SlideValidator:
     
     def validate_slide_lengths(self):
         """Check if slides are within reasonable length limits."""
-        MAX_LINES = 30  # Typical screen can show ~20-25 lines
-        MAX_CHARS = 1500  # Reasonable character limit per slide
+        # More realistic limits for Marp slides
+        MAX_LINES = 20  # Typical Marp slide shows ~15-20 lines comfortably
+        MAX_CONTENT_LINES = 15  # Content lines (excluding code blocks)
+        MAX_CHARS = 1000  # Reduced character limit
+        
+        # Weight factors for different content types
+        CODE_BLOCK_WEIGHT = 1.5  # Code blocks take more vertical space
+        TABLE_WEIGHT = 1.3       # Tables take more space
+        IMAGE_WEIGHT = 3.0       # Images take significant space
+        HEADING_WEIGHT = 1.2     # Headings have larger font
         
         folders = [f for f in self.presentation_dir.iterdir() if f.is_dir()]
         slide_folders = [f for f in folders if re.match(r'^\d{2}-', f.name)]
@@ -174,14 +182,77 @@ class SlideValidator:
                 content = page_file.read_text(encoding='utf-8')
                 lines = content.split('\n')
                 
-                # Count non-empty lines
-                non_empty_lines = [line for line in lines if line.strip()]
+                # Calculate weighted line count
+                weighted_lines = 0
+                content_lines = 0
+                in_code_block = False
                 
-                if len(non_empty_lines) > MAX_LINES:
-                    self.warnings.append(f"Slide too long ({len(non_empty_lines)} lines): {folder.name}")
+                for line in lines:
+                    if line.strip():
+                        # Check for code blocks
+                        if line.strip().startswith('```'):
+                            in_code_block = not in_code_block
+                            weighted_lines += 0.5  # Code block delimiters
+                        elif in_code_block:
+                            weighted_lines += CODE_BLOCK_WEIGHT
+                        # Check for images
+                        elif re.match(r'!\[.*?\]\(.*?\)', line):
+                            weighted_lines += IMAGE_WEIGHT
+                        # Check for tables
+                        elif '|' in line and line.count('|') >= 2:
+                            weighted_lines += TABLE_WEIGHT
+                        # Check for headings
+                        elif re.match(r'^#+\s', line):
+                            weighted_lines += HEADING_WEIGHT
+                        else:
+                            weighted_lines += 1
+                            content_lines += 1
+                
+                # Count specific elements for detailed reporting
+                code_blocks = len(re.findall(r'```', content)) // 2
+                images = len(re.findall(r'!\[.*?\]\(.*?\)', content))
+                tables = len([l for l in lines if '|' in l and l.count('|') >= 2])
+                
+                # Check various limits
+                if weighted_lines > MAX_LINES:
+                    self.errors.append(
+                        f"Slide content exceeds vertical limit in {folder.name}: "
+                        f"{weighted_lines:.1f} weighted lines (max: {MAX_LINES})"
+                    )
+                elif weighted_lines > MAX_LINES * 0.9:  # Warning at 90%
+                    self.warnings.append(
+                        f"Slide approaching vertical limit in {folder.name}: "
+                        f"{weighted_lines:.1f} weighted lines"
+                    )
+                
+                if content_lines > MAX_CONTENT_LINES:
+                    self.warnings.append(
+                        f"Too much text content in {folder.name}: "
+                        f"{content_lines} lines (recommended: {MAX_CONTENT_LINES})"
+                    )
                 
                 if len(content) > MAX_CHARS:
-                    self.warnings.append(f"Slide has too many characters ({len(content)}): {folder.name}")
+                    self.warnings.append(
+                        f"Slide has too many characters ({len(content)}): {folder.name}"
+                    )
+                
+                # Specific warnings for heavy elements
+                if code_blocks > 1:
+                    self.warnings.append(
+                        f"Multiple code blocks ({code_blocks}) in {folder.name} may cause overflow"
+                    )
+                    
+                if images > 1:
+                    self.warnings.append(
+                        f"Multiple images ({images}) in {folder.name} may cause overflow"
+                    )
+                    
+                # Check for slides that are likely to overflow
+                if code_blocks >= 1 and content_lines > 10:
+                    self.errors.append(
+                        f"Slide likely to overflow in {folder.name}: "
+                        f"code block with {content_lines} content lines"
+                    )
     
     def validate_markdown_syntax(self):
         """Basic markdown syntax validation."""

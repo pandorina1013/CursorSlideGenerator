@@ -1,0 +1,36 @@
+#!/bin/bash
+# Quick Marp slide generator script
+
+# Default values
+OUTPUT_DIR="output"
+THEME="default"
+
+# Parse command line options
+while getopts "o:t:h" opt; do
+  case $opt in
+    o)
+      OUTPUT_DIR="$OPTARG"
+      ;;
+    t)
+      THEME="$OPTARG"
+      ;;
+    h)
+      echo "Usage: $0 [-o output_dir] [-t theme]"
+      echo "  -o: Output directory (default: output)"
+      echo "  -t: Theme (default/gaia/uncover)"
+      echo ""
+      echo "Paste or type your slide content, then press Ctrl+D when done."
+      exit 0
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+  esac
+done
+
+echo "📝 Paste your slide content below (press Ctrl+D when done):"
+echo "----------------------------------------"
+
+# Read from stdin and pass to quick_slides.py
+uv run python quick_slides.py -o "$OUTPUT_DIR" -t "$THEME" 

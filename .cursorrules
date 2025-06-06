@@ -1,0 +1,182 @@
+# Marp Slide Generator - Cursor Rules
+
+## Project Overview
+This is a Marp slide generator that intelligently splits content into well-organized slides. The system watches for changes and automatically regenerates slides.
+
+## Key Commands
+
+### Generate Slides
+```bash
+uv run marp-gen -i [input_file] -o [output_dir] -n [presentation_name] -t [theme]
+```
+
+### Watch Mode (for live editing)
+```bash
+uv run python watch_slides.py -i [input_file] -o [output_dir] -n [presentation_name]
+```
+
+### Quick Generation from Chat
+You can paste slide content directly in Cursor chat and generate slides:
+
+```bash
+# Method 1: Using echo (for shorter content)
+echo "YOUR SLIDE CONTENT HERE" | uv run python quick_slides.py
+
+# Method 2: Using heredoc (for longer content)
+uv run python quick_slides.py << 'EOF'
+# Your Title
+
+Your slide content here...
+
+---
+
+# Another slide
+More content...
+EOF
+
+# Method 3: Direct text option
+uv run python quick_slides.py -c "# Quick Slide"
+
+# Method 4: With custom presentation name
+uv run python quick_slides.py -n "my-presentation" << 'EOF'
+# Content here
+EOF
+```
+
+## File Structure Understanding
+
+### Input Files
+- `.txt` or `.md` files containing slide content
+- Use `---` for explicit page breaks
+- Headers (`#`, `##`) create natural break points
+
+### Output Structure
+```
+output/
+└── <presentation-name>/     # Named after first title or custom name
+    ├── master_slide.md      # Master file that includes all pages
+    ├── index.md             # Index of all slides with titles
+    ├── 01-introduction/     # Folders named by slide titles
+    │   ├── page.md          # Individual slide content
+    │   └── assets/          # Images, diagrams for this page
+    ├── 02-getting-started/
+    │   ├── page.md
+    │   └── assets/
+    └── ...
+```
+
+**Note**: 
+- Presentation folder is named from the first main title or can be specified with `-n`
+- Slide folders are named with format `NN-slide-title` where:
+  - `NN` is the slide number (01, 02, etc.)
+  - `slide-title` is derived from the first header in the slide
+  - Special characters are removed and spaces become hyphens
+
+## Editing Workflow
+
+### 1. Initial Generation
+- Create or edit your input file with slide content
+- Run the generator to create the initial slide structure
+- Review the generated slides in `output/<presentation-name>/`
+- Check `output/<presentation-name>/index.md` for a quick overview
+
+### 2. Iterative Editing
+- **Option A**: Edit the source input file and regenerate
+- **Option B**: Edit individual `page.md` files directly
+- **Option C**: Use watch mode for automatic regeneration
+- **Option D**: Paste content in chat and use quick_slides.py
+
+### 3. Asset Management
+- Place images in the appropriate `<presentation>/<NN-title>/assets/` folder
+- Reference them in markdown as `assets/image.png`
+
+## Smart Editing Tips
+
+### When editing slide content:
+1. **Preserve Structure**: Keep Marp front matter intact when editing page.md files
+2. **Page Limits**: Aim for 15 lines or 800 characters per slide
+3. **Headers**: Use `#` for new slide topics, `##` for subsections
+4. **Lists**: Use bullet points for clarity and readability
+
+### When asked to modify slides:
+1. Check if working with source file or generated pages
+2. For content changes, prefer editing the source and regenerating
+3. For formatting tweaks, edit individual page.md files
+4. Always maintain the Marp front matter in page files
+
+## Marp-Specific Features
+
+### Supported Themes
+- `default`: Clean, professional look
+- `gaia`: Bold, high-contrast theme  
+- `uncover`: Minimalist design
+
+### Special Marp Syntax
+- `<!-- fit -->`: Fit text to slide
+- `![bg](image.jpg)`: Background image
+- `![bg left](image.jpg)`: Split background
+- `$$` for math equations
+- `:::note` for speaker notes
+
+## Common Tasks
+
+### Generate from Chat Content
+When user provides slide content in chat:
+```bash
+# Save to a variable or use heredoc
+uv run python quick_slides.py << 'EOF'
+[PASTE USER'S CONTENT HERE]
+EOF
+
+# Or with a custom name
+uv run python quick_slides.py -n "presentation-name" << 'EOF'
+[PASTE USER'S CONTENT HERE]
+EOF
+```
+
+### Add a New Slide
+1. Edit the input file to add content
+2. Use `---` to explicitly create a new slide
+3. Regenerate with `uv run marp-gen`
+
+### Reorder Slides
+1. Either reorder in the source file and regenerate
+2. Or manually rename folders (maintaining the NN- prefix)
+3. Update master_slide.md references if needed
+
+### Add Images
+1. Find the correct folder (e.g., `output/my-presentation/03-data-analysis/`)
+2. Copy image to the `assets/` subfolder
+3. Reference in markdown: `![description](assets/image.png)`
+
+### Change Theme
+```bash
+uv run marp-gen -i input.txt -o output -t gaia
+```
+
+## Best Practices
+
+1. **Version Control**: Commit source files, consider .gitignore for output/
+2. **Consistent Styling**: Use the same theme throughout a presentation
+3. **Preview Often**: Use Marp preview in VS Code or generate PDFs
+4. **Modular Content**: One concept per slide for clarity
+5. **Clear Titles**: Start each slide with a clear header for better folder naming
+6. **Presentation Names**: Use descriptive names with `-n` option for multiple presentations
+
+## Troubleshooting
+
+### Slides too long/short
+- Adjust `max_lines_per_page` in `page_splitter.py`
+- Use explicit `---` breaks for manual control
+
+### Images not showing
+- Check file paths are relative to page.md location
+- Ensure images are in the correct assets/ folder
+
+### Theme not applying
+- Verify theme name is correct (case-sensitive)
+- Check Marp front matter in generated files
+
+### Duplicate folder names
+- The system adds numeric prefixes to prevent conflicts
+- If titles are identical, folders will still be unique (01-title, 02-title) 

@@ -1,0 +1,35 @@
+[project]
+name = "marp-slide-generator"
+version = "0.1.0"
+description = "An intelligent Marp slide generator that automatically splits content into well-organized slides"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "click>=8.0.0",
+    "pyyaml>=6.0",
+    "markdown>=3.0.0",
+    "watchdog>=3.0.0",
+]
+
+[project.scripts]
+marp-gen = "slide_generator:main"
+marp-quick = "quick_slides:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+include = [
+    "*.py",
+    "README.md",
+    "pyproject.toml",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "pylint>=2.17.0",
+    "black>=23.0.0",
+    "pytest>=7.0.0",
+] 

@@ -12,7 +12,12 @@ uv run marp-gen -i [input_file] -o [output_dir] -n [presentation_name] -t [theme
 
 ### Watch Mode (for live editing)
 ```bash
-uv run python watch_slides.py -i [input_file] -o [output_dir] -n [presentation_name]
+uv run marp-watch -i [input_file] -o [output_dir] -n [presentation_name]
+```
+
+### Regenerate Master/Index (after manual edits)
+```bash
+uv run marp-regenerate [presentation_directory]
 ```
 
 ### Quick Generation from Chat
@@ -20,10 +25,10 @@ You can paste slide content directly in Cursor chat and generate slides:
 
 ```bash
 # Method 1: Using echo (for shorter content)
-echo "YOUR SLIDE CONTENT HERE" | uv run python quick_slides.py
+echo "YOUR SLIDE CONTENT HERE" | uv run marp-quick
 
 # Method 2: Using heredoc (for longer content)
-uv run python quick_slides.py << 'EOF'
+uv run marp-quick << 'EOF'
 # Your Title
 
 Your slide content here...
@@ -35,10 +40,10 @@ More content...
 EOF
 
 # Method 3: Direct text option
-uv run python quick_slides.py -c "# Quick Slide"
+uv run marp-quick -c "# Quick Slide"
 
 # Method 4: With custom presentation name
-uv run python quick_slides.py -n "my-presentation" << 'EOF'
+uv run marp-quick -n "my-presentation" << 'EOF'
 # Content here
 EOF
 ```
@@ -84,7 +89,7 @@ output/
 - **Option A**: Edit the source input file and regenerate
 - **Option B**: Edit individual `page.md` files directly
 - **Option C**: Use watch mode for automatic regeneration
-- **Option D**: Paste content in chat and use quick_slides.py
+- **Option D**: Paste content in chat and use marp-quick
 
 ### 3. Asset Management
 - Place images in the appropriate `<presentation>/<NN-title>/assets/` folder
@@ -103,6 +108,8 @@ output/
 2. For content changes, prefer editing the source and regenerating
 3. For formatting tweaks, edit individual page.md files
 4. Always maintain the Marp front matter in page files
+5. **NEVER edit master_slide.md directly** - Always edit individual page.md files or reorganize folders
+6. When splitting slides, create new folders and update page.md files individually
 
 ## Marp-Specific Features
 
@@ -124,12 +131,12 @@ output/
 When user provides slide content in chat:
 ```bash
 # Save to a variable or use heredoc
-uv run python quick_slides.py << 'EOF'
+uv run marp-quick << 'EOF'
 [PASTE USER'S CONTENT HERE]
 EOF
 
 # Or with a custom name
-uv run python quick_slides.py -n "presentation-name" << 'EOF'
+uv run marp-quick -n "presentation-name" << 'EOF'
 [PASTE USER'S CONTENT HERE]
 EOF
 ```
@@ -142,7 +149,7 @@ EOF
 ### Reorder Slides
 1. Either reorder in the source file and regenerate
 2. Or manually rename folders (maintaining the NN- prefix)
-3. Update master_slide.md references if needed
+3. Run `uv run marp-regenerate output/presentation-name` to update master/index
 
 ### Add Images
 1. Find the correct folder (e.g., `output/my-presentation/03-data-analysis/`)

@@ -12,8 +12,10 @@ dependencies = [
 ]
 
 [project.scripts]
-marp-gen = "slide_generator:main"
-marp-quick = "quick_slides:main"
+marp-gen = "src.scripts.marp_gen:main"
+marp-watch = "src.scripts.marp_watch:main" 
+marp-quick = "src.scripts.marp_quick:main"
+marp-regenerate = "src.scripts.marp_regenerate:main"
 
 [build-system]
 requires = ["hatchling"]

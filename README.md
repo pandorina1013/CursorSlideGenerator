@@ -1,275 +1,103 @@
 # Marp Slide Generator
 
-An intelligent slide generator that automatically splits your content into well-organized Marp slides with proper formatting and structure. Optimized for use with Cursor IDE.
+A smart slide generator for creating well-organized Marp presentations. Automatically splits content into properly sized slides with intelligent break points.
 
-## Features
+## Quick Start in Cursor
 
-- **Intelligent Content Splitting**: Automatically divides content into appropriately sized pages
-- **Smart Break Detection**: Recognizes natural content breaks (headers, sections)
-- **Marp Formatting**: Adds proper Marp front matter and styling
-- **Organized Structure**: Creates a clean directory structure with presentation and slide folders
-- **Theme Support**: Supports multiple Marp themes (default, gaia, uncover)
-- **Master Slide Generation**: Creates a master slide that references all individual pages
-- **Watch Mode**: Automatically regenerates slides when input file changes
-- **Cursor IDE Integration**: Optimized workflow for iterative slide editing
-- **Quick Generation**: Generate slides directly from chat or clipboard
+### Generate slides from chat content
 
-## Installation
-
-1. Clone this repository
-2. Install `uv` if you haven't already:
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
-3. Install dependencies:
-```bash
-uv sync
-```
-
-## Usage
-
-### Basic Usage
+Paste your content directly in Cursor chat and use:
 
 ```bash
-uv run marp-gen -i input.txt
-```
+# Method 1: Using echo
+echo "YOUR SLIDE CONTENT HERE" | uv run marp-quick
 
-### With Custom Presentation Name
+# Method 2: Using heredoc (recommended for longer content)
+uv run marp-quick << 'EOF'
+# Your Title
 
-```bash
-uv run marp-gen -i input.txt -n my-presentation
-```
-
-### With Theme Selection
-
-```bash
-uv run marp-gen -i input.txt -n my-presentation -t gaia
-```
-
-### Watch Mode (Recommended for Cursor)
-
-```bash
-uv run python watch_slides.py -i input.txt -n my-presentation
-```
-
-This will watch your input file and automatically regenerate slides whenever you save changes.
-
-### Quick Generation from Chat/Clipboard
-
-Perfect for when you want to quickly generate slides from content in Cursor's chat:
-
-#### Method 1: Using echo (for short content)
-```bash
-echo "# My Title\n\nContent here" | uv run python quick_slides.py
-```
-
-#### Method 2: Using heredoc (for longer content)
-```bash
-uv run python quick_slides.py << 'EOF'
-# Introduction
-
-Welcome to my presentation
-
-## Topics
-- Topic 1
-- Topic 2
-- Topic 3
+Your slide content here...
 
 ---
 
-# Main Content
-
-Details go here...
+# Another slide
+More content...
 EOF
 ```
 
-#### Method 3: With custom presentation name
-```bash
-uv run python quick_slides.py -n "ai-workshop" << 'EOF'
-# AI Workshop
+### Generate from a file
 
-Let's learn about AI together!
-EOF
+```bash
+uv run marp-gen -i input.txt -o output -n my-presentation -t gaia
 ```
 
-#### Method 4: Interactive mode
+### Watch mode (auto-regenerate on file changes)
+
 ```bash
-./marp-quick
-# Then paste your content and press Ctrl+D
+uv run marp-watch -i input.txt -o output -n my-presentation
 ```
 
-### Command Line Options
-
-- `-i, --input`: Input file containing slide content (required)
-- `-o, --output`: Output directory for generated slides (default: 'output')
-- `-n, --name`: Presentation name (defaults to first title in content)
-- `-t, --theme`: Marp theme to use (choices: default, gaia, uncover)
-
-## Cursor IDE Workflow
-
-This project is optimized for use with Cursor IDE. See `.cursorrules` for detailed guidelines.
-
-### Recommended Workflow:
-
-1. **Create your content file** (e.g., `my_slides.txt`)
-2. **Start watch mode** in a terminal:
-   ```bash
-   uv run python watch_slides.py -i my_slides.txt -n my-awesome-presentation
-   ```
-3. **Edit in Cursor**: Make changes to your input file, and slides will auto-regenerate
-4. **Preview**: Open `output/my-awesome-presentation/master_slide.md` with Marp preview
-5. **Iterate**: Continue editing and see changes in real-time
-
-### Quick Generation in Cursor Chat:
-
-When someone pastes slide content in Cursor's chat, you can quickly generate slides:
+### Regenerate master/index after manual edits
 
 ```bash
-uv run python quick_slides.py -n "presentation-name" << 'EOF'
-[Paste the content here]
-EOF
+uv run marp-regenerate output/my-presentation
 ```
 
 ## Output Structure
 
-The generator creates the following directory structure:
-
 ```
 output/
-└── <presentation-name>/     # Named after first title or custom -n parameter
-    ├── master_slide.md      # Master slide file that includes all pages
-    ├── index.md            # Index listing all slides with titles
-    ├── 01-introduction/    # Slide folders named by number and title
-    │   ├── page.md         # Individual slide content
-    │   └── assets/         # Images and other assets for this slide
-    ├── 02-getting-started/
+└── presentation-name/
+    ├── master_slide.md      # Master file with all slides
+    ├── index.md             # Index of all slides
+    ├── 01-title/
+    │   ├── page.md          # Individual slide content
+    │   └── assets/          # Images for this slide
+    ├── 02-introduction/
     │   ├── page.md
     │   └── assets/
     └── ...
 ```
 
-### Folder Naming Convention
+## Features
 
-- **Presentation folder**: Uses the first main title or custom name specified with `-n`
-- **Slide folders**: Format `NN-slide-title` where:
-  - `NN` is the slide number (01, 02, etc.)
-  - `slide-title` is derived from the first header in the slide
-  - Special characters are removed and spaces become hyphens
+- **Smart splitting**: Automatically splits content at headers and logical break points
+- **Page limits**: Keeps slides under 15 lines for readability
+- **Asset management**: Each slide has its own assets folder
+- **Live editing**: Watch mode for automatic regeneration
+- **Flexible input**: From files, stdin, or direct text
 
-## How It Works
+## Editing Workflow
 
-1. **Content Analysis**: The generator analyzes your input content to identify natural break points
-2. **Smart Splitting**: Content is split based on:
-   - Explicit page breaks (`---`)
-   - Major headings (# and ##)
-   - Content length limits (15 lines or 800 characters per page)
-3. **Formatting**: Each page is formatted with:
-   - Marp front matter
-   - Theme settings
-   - Enhanced spacing for readability
-4. **Organization**: Creates a presentation folder with individual slide folders
-5. **Master Slide**: Combines all pages into a single master slide for presentation
+1. **Never edit master_slide.md directly** - Always edit individual page.md files
+2. To split a slide: Create new folders and move content
+3. To reorder: Rename folders (keep NN- prefix)
+4. After manual edits: Run `marp-regenerate` to update master/index
 
-## Example Input
+## Themes
 
-Create a file `example_slides.txt`:
+- `default` - Clean, professional
+- `gaia` - Bold, high-contrast
+- `uncover` - Minimalist
 
-```markdown
-# Introduction to Python
+## Tips
 
-Python is a high-level programming language known for its simplicity and readability.
-
-## Key Features
-
-- Easy to learn
-- Versatile and powerful
-- Large ecosystem of libraries
-- Great community support
-
----
-
-# Getting Started
+- Use `#` for slide titles, `##` for subtitles
+- Use `---` for explicit page breaks
+- Keep content concise - aim for bullet points
+- Place images in the slide's `assets/` folder
 
 ## Installation
 
-1. Download Python from python.org
-2. Install using the installer
-3. Verify installation: `python --version`
-
-## First Program
-
-```python
-print("Hello, World!")
-```
-
----
-
-# Data Types
-
-Python supports various data types:
-
-- Numbers (int, float)
-- Strings
-- Lists
-- Dictionaries
-- Sets
-- Tuples
-```
-
-Generate slides:
 ```bash
-uv run marp-gen -i example_slides.txt -n python-intro
+# Clone the repository
+git clone <repo-url>
+cd CursorSlideGenerator
+
+# Install dependencies
+uv sync
 ```
-
-## Rendering Slides
-
-After generating the slides, you can render them using Marp:
-
-### Using Marp CLI
-
-```bash
-# Install Marp CLI
-npm install -g @marp-team/marp-cli
-
-# Render the master slide (example for python-intro presentation)
-marp output/python-intro/master_slide.md -o python-intro.pdf
-```
-
-### Using VS Code
-
-1. Install the Marp for VS Code extension
-2. Open `master_slide.md` from your presentation folder
-3. Preview or export using the extension
-
-## Development
-
-### Running Tests
-
-```bash
-uv run pytest
-```
-
-### Code Formatting
-
-```bash
-uv run black .
-```
-
-### Linting
-
-```bash
-uv run pylint *.py
-```
-
-## Tips for Best Results
-
-1. **Use Clear Headers**: Start major sections with # or ## headers
-2. **Keep Content Concise**: Aim for bullet points and short paragraphs
-3. **Use Page Breaks**: Add `---` where you want explicit page breaks
-4. **Add Visual Elements**: Include code blocks, lists, and images for engagement
-5. **Use Watch Mode**: For iterative editing in Cursor
-6. **Name Your Presentations**: Use the `-n` option for meaningful folder names
 
 ## License
 
-MIT License 
+MIT 

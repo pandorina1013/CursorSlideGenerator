@@ -11,8 +11,8 @@ import click
 from pathlib import Path
 from typing import List, Tuple
 
-from page_splitter import PageSplitter
-from marp_formatter import MarpFormatter
+from .page_splitter import PageSplitter
+from .marp_formatter import MarpFormatter
 
 
 class SlideGenerator:

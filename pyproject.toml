@@ -16,6 +16,7 @@ marp-gen = "src.scripts.marp_gen:main"
 marp-watch = "src.scripts.marp_watch:main" 
 marp-quick = "src.scripts.marp_quick:main"
 marp-regenerate = "src.scripts.marp_regenerate:main"
+marp-validate = "src.scripts.marp_validate:main"
 
 [build-system]
 requires = ["hatchling"]

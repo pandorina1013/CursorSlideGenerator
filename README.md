@@ -43,6 +43,16 @@ uv run marp-watch -i input.txt -o output -n my-presentation
 uv run marp-regenerate output/my-presentation
 ```
 
+### Validate slide quality
+
+```bash
+# Check for common issues
+uv run marp-validate output/my-presentation
+
+# Strict mode (warnings also fail)
+uv run marp-validate output/my-presentation --strict
+```
+
 ## Output Structure
 
 ```
@@ -66,6 +76,17 @@ output/
 - **Asset management**: Each slide has its own assets folder
 - **Live editing**: Watch mode for automatic regeneration
 - **Flexible input**: From files, stdin, or direct text
+- **Quality validation**: Built-in checks for common slide issues
+
+## Validation Features
+
+The validator checks for:
+- **Structure**: Missing files, incorrect folder naming
+- **Code blocks**: Unclosed code blocks
+- **Mermaid diagrams**: Syntax validation
+- **Content quality**: Slide length warnings
+- **Consistency**: Matching slide counts across files
+- **Assets**: Missing or unused images
 
 ## Editing Workflow
 
@@ -73,6 +94,7 @@ output/
 2. To split a slide: Create new folders and move content
 3. To reorder: Rename folders (keep NN- prefix)
 4. After manual edits: Run `marp-regenerate` to update master/index
+5. Always validate after changes: Run `marp-validate`
 
 ## Themes
 
@@ -86,6 +108,7 @@ output/
 - Use `---` for explicit page breaks
 - Keep content concise - aim for bullet points
 - Place images in the slide's `assets/` folder
+- Run validation after editing to catch issues early
 
 ## Installation
 

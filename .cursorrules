@@ -187,3 +187,43 @@ uv run marp-gen -i input.txt -o output -t gaia
 ### Duplicate folder names
 - The system adds numeric prefixes to prevent conflicts
 - If titles are identical, folders will still be unique (01-title, 02-title) 
+
+## Quality Validation
+
+### Validate Slides
+Check for common issues in your presentation:
+```bash
+uv run marp-validate [presentation_directory]
+
+# Strict mode (warnings also cause failure)
+uv run marp-validate [presentation_directory] --strict
+```
+
+
+### Auto-validation on Generation
+When generating or regenerating slides, always run validation afterwards:
+```bash
+# Generate and validate
+uv run marp-gen -i input.md -o output && uv run marp-validate output/presentation-name
+
+# Regenerate and validate
+uv run marp-regenerate output/presentation-name && uv run marp-validate output/presentation-name
+```
+
+### Common Validation Errors and Fixes
+
+**Unclosed code blocks**
+- Check that every ``` has a matching closing ```
+- Common issue: missing closing backticks at end of file
+
+**Non-sequential numbering**
+- This warning appears after deleting slides
+- Run `uv run marp-regenerate` to fix if needed
+
+**Slide too long**
+- Split content into multiple slides
+- Create new page
+
+**Missing assets**
+- Check that referenced images exist in assets/ folder
+- Ensure paths are relative to page.md location 

@@ -226,4 +226,31 @@ uv run marp-regenerate output/presentation-name && uv run marp-validate output/p
 
 **Missing assets**
 - Check that referenced images exist in assets/ folder
-- Ensure paths are relative to page.md location 
+- Ensure paths are relative to page.md location
+
+## Automated Error Resolution
+
+### When validation errors occur:
+1. **Run validation** to identify all errors
+2. **Fix errors systematically**: 
+   - Read each problematic page.md file
+   - Identify the specific issue (unclosed code blocks, missing titles, etc.)
+   - Apply appropriate fixes using search_replace or edit_file
+   - Re-run validation after each fix
+3. **Repeat until all errors are resolved**
+4. **Handle non-sequential numbering as an ERROR**:
+   - Non-sequential slide numbering should be treated as an error, not a warning
+   - After fixing all other errors, rename folders to ensure sequential numbering
+   - Use format: `01-title`, `02-title`, `03-title`, etc.
+   - Run `uv run marp-regenerate` after renaming to update master_slide.md and index.md
+
+### Error Resolution Process
+```bash
+uv run marp-validate output/presentation-name
+```
+
+### Automated Fix Priority
+1. **Unclosed code blocks** - Add missing closing backticks
+2. **Missing titles** - Add appropriate # headers
+3. **Malformed content** - Fix structure issues
+4. **Non-sequential folders** - Rename to maintain order
